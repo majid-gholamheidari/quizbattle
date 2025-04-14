@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { View, StyleSheet, KeyboardAvoidingView, Platform, Image } from "react-native";
+import {View, StyleSheet, KeyboardAvoidingView, Platform, Image, Alert} from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { login } from "../../services/api";
+
 
 export default function LoginScreen() {
     const [email, setEmail] = useState("");
@@ -11,20 +13,22 @@ export default function LoginScreen() {
     const router = useRouter();
 
     const handleLogin = async () => {
-        setLoading(true);
         try {
-            if (email && password) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                await AsyncStorage.setItem("token", "dummy-token");
-                router.replace("/(tabs)/");
-            } else {
-                alert("Email and password are required.");
+            const response = await login(email, password);
+
+            const token = response.data?.token;
+
+            if (!token) {
+                Alert.alert("Login Error", "Token is missing in server response.");
+                return;
             }
+
+            await AsyncStorage.setItem("token", token);
+            router.replace("/");
+
         } catch (error) {
-            console.error("Login error:", error);
-            alert("Login failed! Please try again.");
-        } finally {
-            setLoading(false);
+            console.error("Login failed:", error);
+            Alert.alert("Login Error", error.message || "An error occurred during login.");
         }
     };
 

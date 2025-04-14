@@ -1,20 +1,60 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
-import { Text, TextInput, Button, Avatar, RadioButton } from "react-native-paper";
-import { useRouter } from "expo-router";
+import React, {useEffect, useState} from "react";
+import {
+    View,
+    StyleSheet,
+    Image,
+    TouchableOpacity,
+    Alert,
+    TouchableWithoutFeedback,
+    Keyboard,
+    ScrollView
+} from "react-native";
+import {Text, TextInput, Button, Avatar, RadioButton} from "react-native-paper";
+import {useFocusEffect, useRouter} from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {apiRequest} from "@/services/api";
+
+
+interface UserProfile {
+    first_name?: string;
+    last_name?: string;
+    gender?: string;
+    email?: string;
+    username?: string;
+    avatar?: string;
+}
 
 export default function ProfileScreen() {
-    const [fullName, setFullName] = useState("John Doe");
-    const [username, setUsername] = useState("john_d");
-    const [gender, setGender] = useState("male");
-    const email = "john.doe@example.com"; // should be fetched from API in real case
+    const [profile, setProfile] = useState<UserProfile | null>(null);
     const [avatar, setAvatar] = useState(null);
+    const [loading, setLoading] = useState<boolean>(true);
+
     const router = useRouter();
 
     const handleAvatarChange = () => {
         Alert.alert("Change Avatar", "This feature will let you pick a new avatar!");
     };
+
+    const loadUserProfile = async () => {
+        try {
+            const response = await apiRequest('/profile', {'method': 'GET', 'body': null});
+            if (!response.success || !response.data) {
+                throw new Error(response.message || "Failed to fetch profile.");
+            }
+            setProfile(response.data.profile);
+        } catch (error: any) {
+            console.log(error)
+            Alert.alert("Error", error.message || "Something went wrong.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            loadUserProfile();
+        }, [])
+    );
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem("token");
@@ -22,60 +62,80 @@ export default function ProfileScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity onPress={handleAvatarChange}>
-                {avatar ? (
-                    <Image source={{ uri: avatar }} style={styles.avatar} />
-                ) : (
-                    <Avatar.Icon size={100} icon="account" style={styles.avatarPlaceholder} />
-                )}
-            </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView contentContainerStyle={{flexGrow: 1}}>
+                <View style={styles.container}>
+                    <TouchableOpacity onPress={handleAvatarChange}>
+                        {avatar ? (
+                            <Image source={{uri: avatar}} style={styles.avatar}/>
+                        ) : (
+                            <Avatar.Icon size={100} icon="account" style={styles.avatarPlaceholder}/>
+                        )}
+                    </TouchableOpacity>
+                    <TextInput
+                        label="First Name"
+                        value={profile?.first_name}
+                        onChangeText={(text) =>
+                            setProfile((prev) => ({ ...prev!, first_name: text }))
+                        }
+                        style={styles.input}
+                    />
 
-            <TextInput
-                label="Full Name"
-                value={fullName}
-                onChangeText={setFullName}
-                style={styles.input}
-            />
+                    <TextInput
+                        label="Last Name"
+                        value={profile?.last_name}
+                        onChangeText={(text) =>
+                            setProfile((prev) => ({ ...prev!, last_name: text }))
+                        }
+                        style={styles.input}
+                    />
 
-            <TextInput
-                label="Username"
-                value={username}
-                onChangeText={setUsername}
-                style={styles.input}
-            />
+                    <TextInput
+                        label="Username"
+                        value={profile?.username}
+                        onChangeText={(text) =>
+                            setProfile((prev) => ({ ...prev!, username: text }))
+                        }
+                        style={styles.input}
+                    />
 
-            <TextInput
-                label="Email"
-                value={email}
-                disabled
-                style={styles.input}
-            />
+                    <TextInput
+                        label="Email"
+                        value={profile?.email}
+                        disabled
+                        style={styles.input}
+                    />
 
-            <Text style={styles.label}>Gender</Text>
-            <RadioButton.Group onValueChange={setGender} value={gender}>
-                <View style={styles.genderOption}>
-                    <RadioButton value="male" />
-                    <Text>Male</Text>
+                    <Text style={styles.label}>Gender</Text>
+                    <RadioButton.Group
+                        onValueChange={(value) =>
+                            setProfile((prev) => ({ ...prev!, gender: value }))
+                        }
+                        value={profile?.gender as string}>
+                        <View style={styles.genderOption}>
+                            <RadioButton value="male"/>
+                            <Text>Male</Text>
+                        </View>
+                        <View style={styles.genderOption}>
+                            <RadioButton value="female"/>
+                            <Text>Female</Text>
+                        </View>
+                    </RadioButton.Group>
+
+
+                    <Button mode="contained" style={styles.saveButton}
+                            onPress={() => Alert.alert("Saved", "Your profile has been updated!")}>
+                        Save Changes
+                    </Button>
+
+                    <Button mode="outlined" onPress={handleLogout} style={styles.logoutButton}>
+                        Log Out
+                    </Button>
+
                 </View>
-                <View style={styles.genderOption}>
-                    <RadioButton value="female" />
-                    <Text>Female</Text>
-                </View>
-                <View style={styles.genderOption}>
-                    <RadioButton value="other" />
-                    <Text>Other</Text>
-                </View>
-            </RadioButton.Group>
+            </ScrollView>
+        </TouchableWithoutFeedback>
 
-            <Button mode="contained" style={styles.saveButton} onPress={() => Alert.alert("Saved", "Your profile has been updated!")}>
-                Save Changes
-            </Button>
-
-            <Button mode="outlined" onPress={handleLogout} style={styles.logoutButton}>
-                Log Out
-            </Button>
-        </View>
     );
 }
 
@@ -114,7 +174,6 @@ const styles = StyleSheet.create({
     },
     logoutButton: {
         marginTop: 10,
-        // borderColor: "red",
         borderRadius: 10
     },
 });
