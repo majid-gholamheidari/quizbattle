@@ -1,10 +1,10 @@
 import { Text, View, StyleSheet } from 'react-native';
 import {Link} from "expo-router";
 
-export default function ProfileScreen() {
+export default function SettingScreen() {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Profile screen</Text>
+            <Text style={styles.text}>Setting screen</Text>
         </View>
     );
 }
@@ -12,9 +12,9 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#25292e',
-        justifyContent: 'center',
+        backgroundColor: '#ffffff',
         alignItems: 'center',
+        justifyContent: 'center',
     },
     text: {
         color: '#fff',

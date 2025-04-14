@@ -4,7 +4,7 @@ import {Link} from "expo-router";
 export default function ScoreScreen() {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>About screen</Text>
+            <Text style={styles.text}>Score screen</Text>
         </View>
     );
 }

@@ -1,29 +1,9 @@
-import { Text, View, StyleSheet } from 'react-native';
-import {Link} from "expo-router";
+import {View, Text} from "react-native";
 
-export default function AuthScreen() {
+export default function LoginScreen() {
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Auth screen</Text>
+        <View style={{ backgroundColor: '#ee3d3d' }}>
+            <Text style={{ color: '#000000', fontSize: 50 }}>Login Page</Text>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    text: {
-        color: '#fff',
-        fontSize: 25
-    },
-    button: {
-        margin: 9,
-        backgroundColor: '#f3f3f3',
-        padding: 12,
-        borderRadius: 8
-    }
-});
