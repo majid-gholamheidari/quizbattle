@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
@@ -9,11 +9,11 @@ import {
     Keyboard,
     ScrollView
 } from "react-native";
-import {Text, TextInput, Button, Avatar, RadioButton} from "react-native-paper";
-import {useFocusEffect, useRouter} from "expo-router";
+import { Text, TextInput, Button, Avatar, RadioButton } from "react-native-paper";
+import { useFocusEffect, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {apiRequest} from "@/services/api";
-
+import { apiRequest } from "@/services/api";
+import AvatarCarousel from "@/components/AvatarCarousel";
 
 interface UserProfile {
     first_name?: string;
@@ -26,24 +26,20 @@ interface UserProfile {
 
 export default function ProfileScreen() {
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [avatar, setAvatar] = useState(null);
+    const [avatar, setAvatar] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-
     const router = useRouter();
-
-    const handleAvatarChange = () => {
-        Alert.alert("Change Avatar", "This feature will let you pick a new avatar!");
-    };
 
     const loadUserProfile = async () => {
         try {
-            const response = await apiRequest('/profile', {'method': 'GET', 'body': null});
+            const response = await apiRequest("/profile", { method: "GET", body: null });
             if (!response.success || !response.data) {
                 throw new Error(response.message || "Failed to fetch profile.");
             }
             setProfile(response.data.profile);
+            setAvatar(response.data.profile.avatar ?? "https://avatar.iran.liara.run/public/5");
         } catch (error: any) {
-            console.log(error)
+            console.log(error);
             Alert.alert("Error", error.message || "Something went wrong.");
         } finally {
             setLoading(false);
@@ -61,17 +57,46 @@ export default function ProfileScreen() {
         router.replace("/auth/login");
     };
 
+    const handleSaveChanges = async () => {
+        setLoading(true)
+        if (!profile) return;
+
+        try {
+            const response = await apiRequest("/update-profile", {
+                method: "PUT",
+                body: {
+                    username: profile.username,
+                    first_name: profile.first_name,
+                    last_name: profile.last_name,
+                    avatar: avatar,
+                    gender: profile.gender
+                }
+            });
+
+            if (!response.success) {
+                throw new Error(response.message || "Failed to update profile.");
+            }
+
+            Alert.alert("Success", "Your profile has been updated.");
+        } catch (error: any) {
+            console.log(error);
+            Alert.alert("Error", error.message || "Something went wrong.");
+        } finally {
+            setLoading(true)
+        }
+    };
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView contentContainerStyle={{flexGrow: 1}}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={styles.container}>
-                    <TouchableOpacity onPress={handleAvatarChange}>
-                        {avatar ? (
-                            <Image source={{uri: avatar}} style={styles.avatar}/>
-                        ) : (
-                            <Avatar.Icon size={100} icon="account" style={styles.avatarPlaceholder}/>
-                        )}
-                    </TouchableOpacity>
+                    <View style={styles.avatarContainer}>
+                        <AvatarCarousel
+                            currentAvatar={avatar}
+                            onSelect={(url) => setAvatar(url)}
+                        />
+                    </View>
+
                     <TextInput
                         label="First Name"
                         value={profile?.first_name}
@@ -111,31 +136,28 @@ export default function ProfileScreen() {
                         onValueChange={(value) =>
                             setProfile((prev) => ({ ...prev!, gender: value }))
                         }
-                        value={profile?.gender as string}>
+                        value={profile?.gender as string}
+                    >
                         <View style={styles.genderOption}>
-                            <RadioButton value="male"/>
+                            <RadioButton value="male" />
                             <Text>Male</Text>
                         </View>
                         <View style={styles.genderOption}>
-                            <RadioButton value="female"/>
+                            <RadioButton value="female" />
                             <Text>Female</Text>
                         </View>
                     </RadioButton.Group>
 
-
-                    <Button mode="contained" style={styles.saveButton}
-                            onPress={() => Alert.alert("Saved", "Your profile has been updated!")}>
+                    <Button mode="contained" style={styles.saveButton} onPress={handleSaveChanges}>
                         Save Changes
                     </Button>
 
                     <Button mode="outlined" onPress={handleLogout} style={styles.logoutButton}>
                         Log Out
                     </Button>
-
                 </View>
             </ScrollView>
         </TouchableWithoutFeedback>
-
     );
 }
 
@@ -149,20 +171,20 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 50,
-        alignSelf: "center",
         marginBottom: 20,
     },
     avatarPlaceholder: {
-        alignSelf: "center",
         marginBottom: 20,
     },
     input: {
+        width: "100%",
         marginBottom: 16,
     },
     label: {
         fontSize: 16,
         marginTop: 10,
         marginBottom: 4,
+        alignSelf: "flex-start",
     },
     genderOption: {
         flexDirection: "row",
@@ -170,10 +192,16 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         marginTop: 20,
-        borderRadius: 10
+        borderRadius: 10,
+        width: "100%",
     },
     logoutButton: {
         marginTop: 10,
-        borderRadius: 10
+        borderRadius: 10,
+        width: "100%",
+    },
+    avatarContainer: {
+        height: 160,
+        marginBottom: 10,
     },
 });

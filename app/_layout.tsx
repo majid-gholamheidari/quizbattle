@@ -1,19 +1,20 @@
 import { useLoading } from '@/stores/useLoading';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { Slot } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
     const loading = useLoading(state => state.loading);
 
     return (
-        <>
+        <GestureHandlerRootView style={{ flex: 1 }}>
             {loading && (
                 <View style={styles.loading}>
                     <ActivityIndicator size="large" color="#ffffff" />
                 </View>
             )}
             <Slot />
-        </>
+        </GestureHandlerRootView>
     );
 }
 
