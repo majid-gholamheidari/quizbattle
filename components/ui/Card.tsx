@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, View, StyleSheet, ViewStyle, StyleProp } from "react-native";
+import { TouchableOpacity, View, Text, StyleSheet, ViewStyle, StyleProp } from "react-native";
 
 interface CardProps {
     children: React.ReactNode;
@@ -14,7 +14,7 @@ export const Card: React.FC<CardProps> = ({ children, onClick, style }) => {
             onPress={onClick}
             style={[styles.card, style]}
         >
-            <View>{children}</View>
+            <View><Text>{children}</Text></View>
         </TouchableOpacity>
     );
 };
@@ -29,5 +29,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 2 },
+        // marginVertical: 8
     },
 });
