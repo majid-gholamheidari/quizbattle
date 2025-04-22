@@ -14,12 +14,8 @@ export default function QuizPage() {
 
     const question = questions[currentQuestion];
 
-    const handleOptionSelect = (index: number) => setSelectedOption(index);
     const handleNext = () => { setSelectedOption(null); setCurrentQuestion(prev => prev + 1); };
     const handlePrev = () => { setSelectedOption(null); setCurrentQuestion(prev => prev - 1); };
-    const handleFinish = () => {
-        alert("Quiz finished! Submitting your answers...");
-    };
 
     const router = useRouter();
 
@@ -31,7 +27,19 @@ export default function QuizPage() {
                     "If you exit now, you will receive a negative score. Are you sure?",
                     [
                         { text: "Back to Quiz", style: "cancel" },
-                        { text: "Exit", style: "destructive", onPress: () => router.back() }
+                        {
+                            text: "Exit",
+                            style: "destructive",
+                            onPress: async () => {
+                                try {
+                                    await apiRequest(`/${quizId}/leave-quiz`, {method: "POST"});
+                                } catch (error) {
+                                    console.error("Error notifying server about leaving quiz:", error);
+                                } finally {
+                                    router.push('/score');
+                                }
+                            }
+                        }
                     ]
                 );
                 return true;
@@ -40,7 +48,7 @@ export default function QuizPage() {
             BackHandler.addEventListener("hardwareBackPress", onBackPress);
 
             return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-        }, [router])
+        }, [router, quizId])
     );
 
     const fetchQuestions = async () => {
@@ -49,11 +57,9 @@ export default function QuizPage() {
             if (res.code === 200) {
                 setQuestions(res.data.questions);
             } else {
-                console.error("Failed to load questions:", res);
                 alert("Problem loading quiz questions!");
             }
         } catch (error) {
-            console.error("Error fetching questions:", error);
             alert("Error connecting to the server!");
         }
     };
@@ -62,6 +68,43 @@ export default function QuizPage() {
             fetchQuestions();
         }
     }, [quizId]);
+
+    const handleOptionSelect = (index: number) => {
+        setQuestions(prev => {
+            const newArr = [...prev];
+            newArr[currentQuestion].selectedAnswer = newArr[currentQuestion].options[index];
+            return newArr;
+        });
+        setSelectedOption(index);
+    };
+
+    const handleFinish = async () => {
+        if (!questions.length) return;
+
+        const payload = {
+            questions: questions.map(q => ({
+                id: q.id,
+                answer: q.selectedAnswer || " "
+            }))
+        };
+
+        try {
+            const res = await apiRequest(`/${quizId}/save-answers`, {
+                method: "POST",
+                body: payload
+            });
+
+            if (res.code === 200) {
+                alert("Your answers were submitted successfully!");
+                router.push("/score");
+            } else {
+                alert("There was a problem saving your answers.");
+            }
+        } catch (error) {
+            alert("Could not connect to the server!");
+        }
+    };
+
 
     return (
         <View style={styles.container}>

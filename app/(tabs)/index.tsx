@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {View, ScrollView, StyleSheet, Image, TouchableOpacity} from "react-native";
 import { Card } from "@/components/ui/Card";
 import { Button, Text } from "react-native-paper";
@@ -45,7 +45,6 @@ export default function Index() {
         }
     };
 
-
     useFocusEffect(
         React.useCallback(() => {
             fetchCategories();
@@ -69,33 +68,12 @@ export default function Index() {
                 const quizCode = res.data.quiz_code;
                 router.push(`/quiz/questions/${quizCode}`);
             } else {
-                console.error("Quiz start failed:", res);
                 alert("There was a problem starting the quiz!");
             }
         } catch (error) {
-            console.error("Error starting quiz:", error);
             alert("There was a problem connecting to the server!");
         }
     };
-
-    const startQuiz = () => {
-        if (!selectedCategory) {
-            console.warn("No category selected!");
-            return;
-        }
-
-        const quizSettings = {
-            categoryId: selectedCategory,
-            difficulty: difficulty,
-            questionCount: questionCount
-        };
-
-        console.log("Starting quiz with settings:", quizSettings);
-
-        // اینجا میتونی مثلا با روتینگ صفحه آزمون رو باز کنی
-        // router.push(`/quiz?category=${selectedCategory}&difficulty=${difficulty}&count=${questionCount}`);
-    };
-
 
     return (
         <ScrollView contentContainerStyle={{ padding: 20 }}>
@@ -111,7 +89,7 @@ export default function Index() {
                         ]}>
                         <CardContent>
                             <TouchableOpacity  onPress={() => setSelectedCategory(cat.id)} style={{width: "100%"}}>
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <View style={styles.categorySelection}>
                                     <Image
                                         source={{ uri: cat.avatar }}
                                         style={{ width: 25, height: 25, borderRadius: 8, marginRight: 8 }}
@@ -195,6 +173,10 @@ const styles = StyleSheet.create({
     centered: {
         flex: 1,
         justifyContent: "center",
+        alignItems: "center"
+    },
+    categorySelection: {
+        flexDirection: "row",
         alignItems: "center"
     }
 });

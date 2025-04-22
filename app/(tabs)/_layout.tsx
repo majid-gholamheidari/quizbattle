@@ -39,9 +39,9 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="score"
                 options={{
-                    title: 'Score',
+                    title: 'Ranking',
                     tabBarIcon: ({color, focused}) => (
-                        <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} size={24}/>
+                        <Ionicons name={focused ? 'trophy' : 'trophy-outline'} color={color} size={24}/>
                     )
 
                 }}/>
