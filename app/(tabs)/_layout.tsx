@@ -22,18 +22,18 @@ export default function TabLayout() {
                     borderTopWidth: 0,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 12,
+                    fontSize: 14,
                 },
             }}
         >
 
             <Tabs.Screen
-                name="profile"
+                name="index"
                 options={{
-                    title: 'Profile',
+                    title: 'Quiz',
                     tabBarIcon: ({color, focused}) => (
-                        <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} size={24}/>
-                    )
+                        <Ionicons name={focused ? 'diamond' : 'diamond-outline'} color={color} size={24}/>
+                    ),
                 }}/>
 
             <Tabs.Screen
@@ -47,29 +47,11 @@ export default function TabLayout() {
                 }}/>
 
             <Tabs.Screen
-                name="index"
+                name="profile"
                 options={{
-                    title: 'Quiz',
+                    title: 'Profile',
                     tabBarIcon: ({color, focused}) => (
-                        <Ionicons name={focused ? 'diamond' : 'diamond-outline'} color={color} size={24}/>
-                    ),
-                }}/>
-
-            <Tabs.Screen
-                name="setting"
-                options={{
-                    title: 'Setting',
-                    tabBarIcon: ({color, focused}) => (
-                        <Ionicons name={focused ? 'settings' : 'settings-outline'} color={color} size={24}/>
-                    )
-                }}/>
-
-            <Tabs.Screen
-                name="about"
-                options={{
-                    title: 'About',
-                    tabBarIcon: ({color, focused}) => (
-                        <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+                        <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} size={24}/>
                     )
                 }}/>
 

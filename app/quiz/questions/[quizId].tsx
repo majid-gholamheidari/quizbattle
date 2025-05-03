@@ -1,6 +1,7 @@
 import {useFocusEffect, useLocalSearchParams, useRouter} from "expo-router";
 import React, {useEffect, useState} from "react";
-import { View, Text, StyleSheet, BackHandler, Alert } from "react-native";
+import {View, Text, StyleSheet, BackHandler, Alert, Image} from "react-native";
+import { ProgressBar } from "react-native-paper";
 import { Button } from "react-native-paper";
 import {LinearGradient} from "expo-linear-gradient";
 import {apiRequest} from "@/services/api";
@@ -57,10 +58,10 @@ export default function QuizPage() {
             if (res.code === 200) {
                 setQuestions(res.data.questions);
             } else {
-                alert("Problem loading quiz questions!");
+                alert("Problem loading quiz questions! #108");
             }
         } catch (error) {
-            alert("Error connecting to the server!");
+            alert("Error connecting to the server! #921");
         }
     };
     useEffect(() => {
@@ -88,6 +89,7 @@ export default function QuizPage() {
             }))
         };
 
+        console.log(payload)
         try {
             const res = await apiRequest(`/${quizId}/save-answers`, {
                 method: "POST",
@@ -126,7 +128,23 @@ export default function QuizPage() {
                                 style={ styles.questionContainer }
                             >
                                 <Text style={styles.questionText}>{questions[currentQuestion].question}</Text>
+
+                                <View style={ styles.categoryContainer }>
+                                    <Image
+                                        source={{ uri: questions[currentQuestion].category['img'] }}
+                                        style={styles.categoryImage}
+                                    />
+                                    <Text style={ styles.categoryTitle }>{questions[currentQuestion].category['title']}</Text>
+                                </View>
                             </LinearGradient>
+
+                            <View style={{ marginBottom: 45 }}>
+                                <ProgressBar
+                                    progress={(currentQuestion + 1) / questions.length}
+                                    color="#6750a4"
+                                    style={{ height: 8, borderRadius: 8, marginTop: 15 }}
+                                />
+                            </View>
 
                             {questions[currentQuestion].options.map((opt, index) => (
                                 <Button
@@ -220,12 +238,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20
     },
     questionContainer: {
-        height: 195,
+        height: 205,
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 8,
         paddingHorizontal: 12,
-        marginBottom: 25
+        marginBottom: 0
     },
     card: {
         backgroundColor: "white",
@@ -256,5 +274,24 @@ const styles = StyleSheet.create({
         width: "48%",
         marginBottom: 10,
         borderRadius: 8,
+    },
+    categoryContainer: {
+        backgroundColor: "#c1bef3",
+        width: "87%",
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+        borderRadius: 8,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    categoryTitle: {
+        color: "#472f9d",
+        fontSize: 15
+    },
+    categoryImage: {
+        width: 22,
+        height: 22,
+        borderRadius: 7,
+        marginRight: 8
     }
 });

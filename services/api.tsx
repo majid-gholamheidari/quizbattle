@@ -2,7 +2,8 @@ import { useLoading } from "@/stores/useLoading";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const BASE_URL = "https://quizbattle.liara.run/api";
+// const BASE_URL = "https://quizbattle.liara.run/api";
+const BASE_URL = "http://192.168.1.104:8000/api";
 
 interface RequestOptions {
     method?: "GET" | "POST" | "PUT" | "DELETE";
